@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: mart_demand_weighted
+    description: "Daily demand metrics with recency weighting for zones"
+    columns:
+      - name: zone_id
+        description: "Zone identifier"
+        tests:
+          - not_null
+      - name: daypart
+        description: "Time period: morning (8-15:59) or evening (16-23:59)"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['morning', 'evening']
+      - name: dow
+        description: "Day of week (0=Sunday, 6=Saturday)"
+        tests:
+          - not_null
+      - name: total_txn
+        description: "Raw transaction count"
+      - name: weighted_txn
+        description: "Recency-weighted transaction count"
+      - name: weighted_minutes
+        description: "Recency-weighted duration minutes"
+      - name: weighted_revenue
+        description: "Recency-weighted revenue"

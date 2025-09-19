@@ -1,0 +1,40 @@
+version: 2
+
+sources:
+  - name: public
+    description: Public schema containing raw transaction and location data
+    tables:
+      - name: historical_transactions
+        description: Historical parking transaction data
+        columns:
+          - name: id
+            description: Primary key for the transaction
+            tests:
+              - unique
+              - not_null
+          - name: zone
+            description: Numeric zone identifier
+          - name: start_park_date
+            description: Date when parking session started
+          - name: start_park_time
+            description: Time when parking session started
+          - name: stop_park_date
+            description: Date when parking session ended
+          - name: stop_park_time
+            description: Time when parking session ended
+          - name: paid_minutes
+            description: Duration of parking session in minutes
+          - name: payment_amount
+            description: Total amount paid (as string with currency)
+          - name: payment_id
+            description: Unique payment identifier
+          - name: channel
+            description: Payment channel used
+          - name: currency
+            description: Currency of the payment
+
+      - name: historical_parkmobile_transactions
+        description: Historical ParkMobile transaction data
+
+      - name: transactions
+        description: Current/live transaction data

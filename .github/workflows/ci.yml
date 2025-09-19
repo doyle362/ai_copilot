@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  backend:
+    name: Backend Tests
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install backend dependencies
+        working-directory: services/analyst
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install -e '.[dev]'
+
+      - name: Run pytest
+        working-directory: services/analyst
+        env:
+          SUPABASE_DB_URL: postgresql://postgres:postgres@localhost:5432/postgres
+        run: |
+          python -m pytest ../../tests -v
+
+  frontend:
+    name: Frontend Build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: web/card/package-lock.json
+
+      - name: Install dependencies
+        working-directory: web/card
+        run: npm ci
+
+      - name: Lint and build
+        working-directory: web/card
+        run: |
+          npm run lint
+          npm run build:artifact
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: analyst-card-dist
+          path: |
+            web/card/dist/
+            web/card/dist.tar.gz
+
+  security:
+    name: Dependency Security Scan
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install security tools
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install pip-audit
+
+      - name: Run pip-audit
+        working-directory: services/analyst
+        run: |
+          pip-audit --requirement pyproject.toml || true
+
+      - name: Node audit
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: npm audit (optional)
+        working-directory: web/card
+        run: |
+          npm install --package-lock-only
+          npm audit --omit=dev || true
