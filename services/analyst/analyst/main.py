@@ -9,7 +9,7 @@ from .scheduler import scheduler_manager
 from .logging_utils import configure_logging
 from .security import emit_security_warnings
 from .observability import configure_observability
-from .routes import health, metrics, insights, threads, memories, prompts, recommendations, changes, diag, analytics
+from .routes import health, metrics, insights, threads, memories, prompts, recommendations, changes, diag, analytics, auth
 # from .routes import experiments  # Temporarily disabled due to FastAPI parameter error
 
 
@@ -67,6 +67,7 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(diag.router)
 app.include_router(metrics.router)
+app.include_router(auth.router)
 app.include_router(insights.router)
 app.include_router(threads.router)
 app.include_router(memories.router)

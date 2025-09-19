@@ -10,6 +10,7 @@ import {
   MessageCircle
 } from 'lucide-react'
 import { apiClient, type Insight, type Recommendation, type PriceChange } from './api'
+import { authManager } from './auth'
 import InsightCard from './components/InsightCard'
 import ThreadDrawer from './components/ThreadDrawer'
 import GeneralChatDrawer from './components/GeneralChatDrawer'
@@ -27,17 +28,31 @@ export default function AnalystCard() {
   const [isGeneralChatOpen, setIsGeneralChatOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<'insights' | 'recommendations' | 'changes'>('insights')
 
-  // Mock configuration - would come from props or URL params
+  // Configuration - automatic token management
   const [config] = useState({
-    token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZXYtdXNlci0wMDEiLCJvcmdfaWQiOiJvcmctZGVtbyIsInJvbGVzIjpbImFkbWluIiwiYW5hbHlzdCJdLCJ6b25lX2lkcyI6WyI2OTcyMiIsIjY5NzEwIiwiNjk3MDMiLCI2OTcxNSIsIjY5NzA1Il0sImlzcyI6ImFwcC5sdmxwYXJraW5nLmNvbSIsImlhdCI6MTc1ODI1MTQwMCwiZXhwIjoxNzU4MzM3ODAwfQ._NcjpehkVhK9P048HUVtevr1NnYZjBIJHeX1JdQkVNA', // Updated token with access to zones that have recommendations
     mode: 'review' as 'review' | 'approve' | 'execute'
   })
 
   useEffect(() => {
-    // Set token and load data
-    apiClient.setToken(config.token)
-    loadData()
-  }, [config.token])
+    // Initialize automatic token management and load data
+    const initializeAuth = async () => {
+      try {
+        const token = await authManager.getValidToken()
+        apiClient.setToken(token)
+        await loadData()
+      } catch (error) {
+        console.error('Failed to initialize authentication:', error)
+        setError('Authentication failed. Please refresh the page.')
+      }
+    }
+
+    initializeAuth()
+
+    // Cleanup on unmount
+    return () => {
+      authManager.destroy()
+    }
+  }, [])
 
   const loadData = async ({ refresh = false }: { refresh?: boolean } = {}) => {
     setIsLoading(true)

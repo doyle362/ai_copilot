@@ -9,8 +9,12 @@ from datetime import datetime, timedelta
 jwt_secret = "dev-local-please-rotate-9b1b7df7b6f54c8bbf7a9c"
 jwt_issuer = "app.lvlparking.com"
 
-# Active zones with recommendations
-active_zones = ["69722", "69710", "69703", "69715", "69705"]
+# All zones with transaction data (22 zones total)
+active_zones = [
+    "69722", "69710", "69703", "69715", "69705", "69718", "69714", "69717",
+    "69712", "69719", "69711", "69716", "69708", "69724", "69709", "69721",
+    "69713", "69701", "69723", "12345", "69720", "69702"
+]
 
 # Create JWT payload
 payload = {
